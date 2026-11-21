@@ -38,6 +38,9 @@ class SmartClassroom implements EnergyMonitor, Controllable, CostCalculable {
     private boolean isOn = false;
 
     public SmartClassroom(double energyConsumed, double tariff) {
+        if (!Double.isFinite(energyConsumed) || energyConsumed < 0 || !Double.isFinite(tariff) || tariff < 0) {
+            throw new IllegalArgumentException("Energy consumption and tariff must be finite and nonnegative.");
+        }
         this.energyConsumed = energyConsumed;
         this.tariff = tariff;
     }
@@ -82,6 +85,9 @@ class ComputerLaboratory implements EnergyMonitor, Controllable, CostCalculable 
     private boolean isOn = false;
 
     public ComputerLaboratory(double energyConsumed, double tariff) {
+        if (!Double.isFinite(energyConsumed) || energyConsumed < 0 || !Double.isFinite(tariff) || tariff < 0) {
+            throw new IllegalArgumentException("Energy consumption and tariff must be finite and nonnegative.");
+        }
         this.energyConsumed = energyConsumed;
         this.tariff = tariff;
     }
@@ -126,6 +132,9 @@ class EVChargingStation implements EnergyMonitor, Controllable, CostCalculable {
     private boolean isOn = false;
 
     public EVChargingStation(double energyConsumed, double tariff) {
+        if (!Double.isFinite(energyConsumed) || energyConsumed < 0 || !Double.isFinite(tariff) || tariff < 0) {
+            throw new IllegalArgumentException("Energy consumption and tariff must be finite and nonnegative.");
+        }
         this.energyConsumed = energyConsumed;
         this.tariff = tariff;
     }
@@ -169,6 +178,9 @@ class SolarPowerUnit implements EnergyMonitor, RenewableEnergy {
     private double avoidedCost;         // Rs. per kWh
 
     public SolarPowerUnit(double energyGenerated, double avoidedCost) {
+        if (!Double.isFinite(energyGenerated) || energyGenerated < 0 || !Double.isFinite(avoidedCost) || avoidedCost < 0) {
+            throw new IllegalArgumentException("Generated energy and avoided cost must be finite and nonnegative.");
+        }
         this.energyGenerated = energyGenerated;
         this.avoidedCost = avoidedCost;
     }
@@ -215,7 +227,12 @@ public class SmartCampusResourceManagement {
             new SolarPowerUnit(50, 8)
         };
 
+        double totalConsumed = 0;
+        double totalGenerated = 0;
+        double totalOperatingCost = 0;
         for (EnergyMonitor resource : resources) {
+            if ("consumed".equals(resource.getEnergyType())) totalConsumed += resource.getEnergyAmount();
+            else totalGenerated += resource.getEnergyAmount();
             System.out.println();
 
             System.out.println("Resource Name: " + resource.getResourceName());
@@ -235,6 +252,7 @@ public class SmartCampusResourceManagement {
             if (resource instanceof CostCalculable) {
                 CostCalculable cost = (CostCalculable) resource;
                 System.out.printf("Operating Cost: Rs. %.2f%n", cost.calculateCost());
+                totalOperatingCost += cost.calculateCost();
             }
 
             // Report renewable generation and savings
@@ -257,6 +275,7 @@ public class SmartCampusResourceManagement {
         }
 
         System.out.println();
+        System.out.printf("Total consumption: %.1f kWh; solar generation: %.1f kWh; gross operating cost: Rs. %.2f%n", totalConsumed, totalGenerated, totalOperatingCost);
         System.out.println("All campus resources processed successfully.");
     }
 }
